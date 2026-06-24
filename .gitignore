@@ -1,5 +1,5 @@
-# Data
-data/raw/
+# Data (actual files ignored by DVC, .dvc pointer files tracked by Git)
+data/raw/labeled_data.csv
 data/processed/
 
 # Models
@@ -23,8 +23,6 @@ venv/
 # Env
 .env
 
-# DVC
-/data/raw/*.dvc
 
 # OS
 .DS_Store
