@@ -219,7 +219,83 @@ docker-compose up --build
 
 ---
 
-## 12. Technology Stack
+## 12. GitHub Version Control
+
+- Code hosted at: `https://github.com/ameynagvekar77/hate-speech-mlops`
+- `.gitignore` excludes `mlruns/`, `models/*.pkl`, `__pycache__/`, `mlflow.db`
+- Every change tracked with `git add`, `git commit`, `git push`
+
+---
+
+## 13. CI/CD Pipeline (GitHub Actions)
+
+File: `.github/workflows/ci.yml`
+
+- Triggers on every push to `main` branch
+- Sets up Python 3.11
+- Installs dependencies from `requirements.txt`
+- Runs `pytest tests/` automatically
+
+### Tests (`tests/test_preprocessing.py`)
+- `test_anonymize` — verifies username removal
+- `test_clean_text_lowercase` — verifies lowercasing
+- `test_clean_text_removes_numbers` — verifies number removal
+- `test_clean_text_removes_hashtags` — verifies hashtag removal
+- `test_preprocess_text_returns_string` — verifies output type
+- `test_preprocess_text_removes_stopwords` — verifies stopword removal
+
+---
+
+## 14. Data Version Control (DVC)
+
+- Initialized with `dvc init`
+- Raw dataset tracked with `dvc add data/raw/labeled_data.csv`
+- `labeled_data.csv.dvc` pointer file committed to GitHub
+- Actual data file excluded from GitHub (too large)
+
+---
+
+## 15. Model Monitoring (Evidently AI)
+
+File: `monitoring.py`
+
+- Splits dataset into **Reference** (70%) and **Current** (30%) data
+- Generates HTML report with:
+  - **Data Drift Report** — detects feature distribution changes
+  - **Classification Performance** — accuracy, precision, recall, F1, confusion matrix
+
+### Run
+```powershell
+python monitoring.py
+```
+Opens `monitoring_report.html` in browser.
+
+---
+
+## 16. Real-time Monitoring (Prometheus + Grafana)
+
+### Prometheus
+- Scrapes Flask API `/metrics` endpoint every 15 seconds
+- Tracks custom metrics:
+  - `hate_speech_predictions_total` — count by label
+  - `prediction_confidence` — confidence score distribution
+  - `flask_http_request_total` — total API requests
+  - `flask_http_request_duration_seconds` — API response time
+
+### Grafana
+- Visualizes Prometheus metrics in real-time dashboards
+- Login: `admin` / `admin`
+
+### Access Points
+
+| Service | URL |
+|---------|-----|
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
+
+---
+
+## 17. Technology Stack
 
 | Category | Technology |
 |----------|------------|
@@ -231,10 +307,15 @@ docker-compose up --build
 | API Framework | Flask |
 | UI Framework | Streamlit |
 | Containerization | Docker + Docker Compose |
+| Version Control | Git + GitHub |
+| CI/CD | GitHub Actions |
+| Data Versioning | DVC |
+| Model Monitoring | Evidently AI |
+| Real-time Monitoring | Prometheus + Grafana |
 
 ---
 
-## 13. How to Run
+## 18. How to Run
 
 ### Option 1: Locally (3 terminals)
 ```powershell
@@ -259,13 +340,17 @@ docker-compose up --build
 | Streamlit UI | http://localhost:8501 |
 | Flask API | http://localhost:8000 |
 | MLflow UI | http://localhost:5000 |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
 
 ---
 
-## 14. MLOps Pipeline Flow
+## 19. Complete MLOps Pipeline Flow
 
 ```
 Raw Data
+   ↓
+DVC (data versioning)
    ↓
 Preprocessing (clean, tokenize, lemmatize)
    ↓
@@ -284,4 +369,10 @@ Flask API (serve predictions)
 Streamlit UI (user interface)
    ↓
 Docker (containerized deployment)
+   ↓
+GitHub + CI/CD (version control + auto testing)
+   ↓
+Prometheus + Grafana (real-time monitoring)
+   ↓
+Evidently AI (model performance monitoring)
 ```

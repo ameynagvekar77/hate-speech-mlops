@@ -6,10 +6,25 @@ import pickle
 import mlflow
 import mlflow.sklearn
 from flask import Flask, request, jsonify
+from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_client import Counter, Histogram
 from src.predict import predict
 from src import config
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
+
+# Custom metrics
+hate_speech_counter = Counter(
+    "hate_speech_predictions_total",
+    "Total number of hate speech predictions",
+    ["label"]
+)
+confidence_histogram = Histogram(
+    "prediction_confidence",
+    "Model prediction confidence scores",
+    buckets=[0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+)
 
 if os.getenv("USE_PKL", "false").lower() == "true":
     with open(config.VECTORIZER_PATH, "rb") as f:
@@ -43,6 +58,10 @@ def predict_endpoint():
         return jsonify({"error": "'text' field must not be empty"}), 400
 
     result = predict(text, vectorizer, rf_model)
+
+    hate_speech_counter.labels(label=result["label"]).inc()
+    confidence_histogram.observe(result["confidence"])
+
     return jsonify(result)
 
 

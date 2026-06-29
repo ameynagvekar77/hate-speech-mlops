@@ -11,3 +11,4 @@ flask
 streamlit
 requests
 pytest
+prometheus-flask-exporter
